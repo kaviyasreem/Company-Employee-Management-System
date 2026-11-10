@@ -1,0 +1,372 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Company Employee Management</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f2f4f8;
+    color: #202938;
+}
+
+header {
+    background: #172d50;
+    color: white;
+    padding: 25px;
+    text-align: center;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 25px auto;
+    padding: 15px;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.card, .panel {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px #00000010;
+}
+
+.card h3 { color: #687386; font-size: 15px; }
+
+.card p {
+    font-size: 27px;
+    font-weight: bold;
+    color: #2456a6;
+}
+
+.panel { margin-top: 22px; }
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 15px;
+    border: 1px solid #ccd2dc;
+    border-radius: 7px;
+}
+
+button {
+    background: #2456a6;
+    color: white;
+    border: none;
+    padding: 11px 16px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+button:hover { background: #173b78; }
+
+.delete {
+    background: #d83b45;
+    padding: 7px 10px;
+}
+
+.search { max-width: 400px; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e4eb;
+    text-align: left;
+}
+
+th {
+    background: #eaf0fa;
+}
+
+.status {
+    font-weight: bold;
+}
+
+footer {
+    text-align: center;
+    color: #687386;
+    padding: 25px;
+}
+
+@media(max-width: 650px) {
+    .table-wrap { overflow-x: auto; }
+    table { min-width: 650px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Company Employee Management System</h1>
+    <p>Smart HR Dashboard | Employee Records and Attendance</p>
+</header>
+
+<div class="container">
+
+    <div class="cards">
+        <div class="card">
+            <h3>Total Employees</h3>
+            <p id="totalEmployees">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Departments</h3>
+            <p id="totalDepartments">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Present Today</h3>
+            <p id="presentEmployees">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Average Salary</h3>
+            <p id="averageSalary">₹0</p>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Add New Employee</h2>
+
+        <label>Employee Name</label>
+        <input id="name" type="text" placeholder="Enter employee name">
+
+        <label>Employee ID</label>
+        <input id="employeeId" type="text" placeholder="Example: EMP101">
+
+        <label>Department</label>
+        <select id="department">
+            <option value="">Select Department</option>
+            <option>Human Resources</option>
+            <option>Data Science</option>
+            <option>Information Technology</option>
+            <option>Finance</option>
+            <option>Marketing</option>
+            <option>Sales</option>
+        </select>
+
+        <label>Job Role</label>
+        <input id="role" type="text" placeholder="Enter job role">
+
+        <label>Monthly Salary (₹)</label>
+        <input id="salary" type="number" min="1" placeholder="Enter salary">
+
+        <button onclick="addEmployee()">Add Employee</button>
+    </div>
+
+    <div class="panel">
+        <h2>Employee Records</h2>
+
+        <input class="search" id="search"
+        type="text" placeholder="Search employee..."
+        oninput="displayEmployees()">
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Role</th>
+                        <th>Salary</th>
+                        <th>Attendance</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="employeeTable"></tbody>
+            </table>
+        </div>
+
+        <p id="emptyMessage">No employee records available.</p>
+    </div>
+
+</div>
+
+<footer>
+    Company Employee Management System | HTML, CSS and JavaScript
+</footer>
+
+<script>
+let employees = JSON.parse(
+    localStorage.getItem("companyEmployees") || "[]"
+);
+
+function saveEmployees() {
+    localStorage.setItem(
+        "companyEmployees",
+        JSON.stringify(employees)
+    );
+}
+
+function addEmployee() {
+    let name = document.getElementById("name").value.trim();
+    let id = document.getElementById("employeeId").value.trim();
+    let department = document.getElementById("department").value;
+    let role = document.getElementById("role").value.trim();
+    let salary = Number(document.getElementById("salary").value);
+
+    if (!name || !id || !department || !role ||
+        !Number.isFinite(salary) || salary <= 0) {
+        alert("Please enter all employee details correctly.");
+        return;
+    }
+
+    let duplicate = employees.some(
+        employee => employee.id.toLowerCase() === id.toLowerCase()
+    );
+
+    if (duplicate) {
+        alert("This Employee ID already exists.");
+        return;
+    }
+
+    employees.push({
+        id: id,
+        name: name,
+        department: department,
+        role: role,
+        salary: salary,
+        attendance: "Not Marked"
+    });
+
+    saveEmployees();
+
+    document.getElementById("name").value = "";
+    document.getElementById("employeeId").value = "";
+    document.getElementById("department").value = "";
+    document.getElementById("role").value = "";
+    document.getElementById("salary").value = "";
+
+    updateDashboard();
+}
+
+function markAttendance(id, status) {
+    let employee = employees.find(item => item.id === id);
+
+    if (employee) {
+        employee.attendance = status;
+        saveEmployees();
+        updateDashboard();
+    }
+}
+
+function deleteEmployee(id) {
+    if (!confirm("Are you sure you want to delete this employee?")) {
+        return;
+    }
+
+    employees = employees.filter(item => item.id !== id);
+    saveEmployees();
+    updateDashboard();
+}
+
+function displayEmployees() {
+    let search = document.getElementById("search").value.toLowerCase();
+
+    let filtered = employees.filter(employee =>
+        employee.name.toLowerCase().includes(search) ||
+        employee.id.toLowerCase().includes(search) ||
+        employee.department.toLowerCase().includes(search)
+    );
+
+    let table = document.getElementById("employeeTable");
+    table.innerHTML = "";
+
+    document.getElementById("emptyMessage").style.display =
+        filtered.length ? "none" : "block";
+
+    filtered.forEach(employee => {
+        let row = table.insertRow();
+
+        [
+            employee.id,
+            employee.name,
+            employee.department,
+            employee.role,
+            "₹" + employee.salary.toLocaleString("en-IN")
+        ].forEach(value => {
+            row.insertCell().textContent = value;
+        });
+
+        let attendanceCell = row.insertCell();
+        let select = document.createElement("select");
+
+        ["Not Marked", "Present", "Absent"].forEach(status => {
+            let option = document.createElement("option");
+            option.value = status;
+            option.textContent = status;
+            select.appendChild(option);
+        });
+
+        select.value = employee.attendance;
+        select.onchange = () => markAttendance(
+            employee.id, select.value
+        );
+
+        attendanceCell.appendChild(select);
+
+        let actionCell = row.insertCell();
+        let button = document.createElement("button");
+
+        button.textContent = "Delete";
+        button.className = "delete";
+        button.onclick = () => deleteEmployee(employee.id);
+
+        actionCell.appendChild(button);
+    });
+}
+
+function updateDashboard() {
+    let departments = new Set(
+        employees.map(employee => employee.department)
+    );
+
+    let present = employees.filter(
+        employee => employee.attendance === "Present"
+    ).length;
+
+    let totalSalary = employees.reduce(
+        (sum, employee) => sum + employee.salary, 0
+    );
+
+    let average = employees.length
+        ? totalSalary / employees.length : 0;
+
+    document.getElementById("totalEmployees").textContent =
+        employees.length;
+
+    document.getElementById("totalDepartments").textContent =
+        departments.size;
+
+    document.getElementById("presentEmployees").textContent =
+        present;
+
+    document.getElementById("averageSalary").textContent =
+        "₹" + Math.round(average).toLocaleString("en-IN");
+
+    displayEmployees();
+}
+
+updateDashboard();
+</script>
+
+</body>
+</html>
