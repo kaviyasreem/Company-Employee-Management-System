@@ -1,2 +1,27 @@
 # Company-Employee-Management-System
-A web-based Company Employee Management System that helps organisations manage employee records, departments, job roles, salaries and attendance. The system provides an admin dashboard to view employee details, search records, add new employees, track attendance and monitor company workforce information.
+
+# Company Employee Management System
+
+## Project Overview
+A web-based HR management application for maintaining employee information and monitoring attendance.
+
+## Features
+- Add employee records
+- Search employees
+- Manage departments
+- Track employee attendance
+- Calculate total employees
+- Calculate average salary
+- Delete employee records
+
+## Technologies
+- HTML
+- CSS
+- JavaScript
+- Browser Local Storage
+
+## Live Demo
+Add your GitHub Pages website link here.
+
+## Author
+Kaviyasree K
